@@ -62,7 +62,7 @@ void bfs() {
 	}
 }
 
-void wall(int cnt) {
+void wall(int cnt) { 
 	if (cnt == 3) {
 		bfs();
 		int temp = zero();
