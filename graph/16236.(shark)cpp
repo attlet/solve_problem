@@ -1,0 +1,120 @@
+#include<iostream>
+#include<queue>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+
+int n;
+int first_x, first_y, first_w;
+int Eat = 0;
+int ret = 0;
+int map[21][21];
+int visit[21][21];
+
+vector<pair<pair<int, int>, int>> fish;
+
+int Next[4][2] = {
+	{-1,0}, {1,0},{0,1},{0,-1}
+};
+
+bool isRange(int x, int y) {
+	if (x < n && y < n && x >= 0 && y >= 0) 
+		return true;
+	else 
+		return false;
+}
+bool cmp(pair<pair<int,int>,int>& a, pair<pair<int, int>, int>& b) {
+	if (a.second == b.second) {
+		if (a.first.second == b.first.second) {
+			return a.first.first < b.first.first;
+		}
+		return a.first.second < b.first.second;
+	}
+	return a.second < b.second;
+}
+
+bool bfs(int x , int y) {
+
+	queue<pair<int, int>> q;
+	//memset(visit, 0, sizeof(visit));
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			visit[i][j] = 0;
+	fish.clear();
+
+	q.push({ x,y });
+	visit[y][x] = 1;
+
+	while (!q.empty()) {
+		int cur_x = q.front().first;
+		int cur_y = q.front().second;
+		q.pop();
+
+		for (int i = 0; i < 4; i++) {
+			int dx = cur_x + Next[i][0];
+			int dy = cur_y + Next[i][1];
+			if (visit[dy][dx] == 0 && isRange(dx, dy)) {
+				if ((map[dy][dx] == first_w) || (map[dy][dx] == 0)) {
+					visit[dy][dx] = visit[cur_y][cur_x] + 1;
+					q.push({ dx, dy });
+					
+				}
+				else if (map[dy][dx] < first_w && map[dy][dx] != 0) {
+					visit[dy][dx] = visit[cur_y][cur_x] + 1;
+					q.push({ dx,dy });
+					fish.push_back({ {dx, dy}, visit[dy][dx]-1 });	
+				}
+			}
+		}
+	}
+
+	if (fish.empty()) {
+		return false;
+	}
+	else {
+		sort(fish.begin(), fish.end(), cmp);
+
+		int Min_len = fish[0].second;
+		int Min_x = fish[0].first.first;
+		int Min_y = fish[0].first.second;
+		
+		first_x = Min_x;
+		first_y = Min_y;
+		map[first_y][first_x] = 0;
+		Eat++;
+		if (Eat == first_w) {
+			first_w++;
+			Eat = 0;
+		}
+		ret += Min_len;
+		return true;
+	}
+	
+}
+
+int main() {
+	cin >> n;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cin >> map[i][j];
+			if (map[i][j] == 9) {
+				first_x = j;
+				first_y = i;
+				first_w = 2;
+			}
+		}
+	}
+	map[first_y][first_x] = 0;
+
+	while (1) {
+		if (!bfs( first_x, first_y)) {
+			break;
+		}
+	}
+
+	cout << ret << '\n';
+
+
+
+}
